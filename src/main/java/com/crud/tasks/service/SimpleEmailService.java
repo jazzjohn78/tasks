@@ -33,12 +33,31 @@ public class SimpleEmailService {
         }
     }
 
+    public void administrationSend(final Mail mail) {
+        log.info("Starting administration email preparation...");
+        try {
+            javaMailSender.send(createAdministrationMimeMessage(mail));
+            log.info("Administration email has been sent.");
+        } catch (MailException e) {
+            log.error("Failed to process administration email sending: " + e.getMessage(), e);
+        }
+    }
+
     private MimeMessagePreparator createMimeMessage(final Mail mail) {
         return mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setTo(mail.getMailTo());
             messageHelper.setSubject(mail.getSubject());
             messageHelper.setText(mailCreatorService.buildTrelloCardEmail(mail.getMessage()), true);
+        };
+    }
+
+    private MimeMessagePreparator createAdministrationMimeMessage(final Mail mail) {
+        return mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setTo(mail.getMailTo());
+            messageHelper.setSubject(mail.getSubject());
+            messageHelper.setText(mailCreatorService.administrationEmail(mail.getMessage()), true);
         };
     }
 
@@ -49,4 +68,5 @@ public class SimpleEmailService {
         mailMessage.setText(mailCreatorService.buildTrelloCardEmail(mail.getMessage()));
         return mailMessage;
     }
+
 }
